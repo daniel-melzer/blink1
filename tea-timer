@@ -1,0 +1,18 @@
+#!/bin/bash
+BLINKTOOL=$(which blink1-tool)
+
+if [ "" = "$BLINKTOOL" ]; then
+	echo "blink1-tool not found"
+	exit 1
+fi
+
+if [ 0 = $# ]; then
+	echo "Usage: tea-timer [MINUTES]"
+	exit 0
+fi
+
+$BLINKTOOL --off -q
+sleep "${1}m"
+
+$BLINKTOOL --playpattern "3,#00ff00,2,0,#009900,2,0" -q
+$BLINKTOOL --off -q
