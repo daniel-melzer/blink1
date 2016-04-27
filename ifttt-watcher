@@ -1,0 +1,47 @@
+#!/bin/bash
+
+blink1tool=$(which blink1-tool)
+jq=$(which jq)
+localtime=$(date -u +%s)
+blink1api="http://api.thingm.com/blink1/events/"
+configfile="~/ifttt-watcher.cfg"
+configfile_secured="/tmp/ifttt-watcher.cfg"
+
+if [ "" = "${blink1tool}" ]; then
+	echo "blink1-tool not found"
+	exit 1
+fi
+if [ "" = "${jq}" ]; then
+	echo "jq not found"
+	exit 1
+fi
+
+while true; do
+    # Check if the config file contains something we don't want.
+    if egrep -q -v '^#|^[^ ]*=[^;]*' "${configfile}"; then
+        # Filter the original to a new file.
+        egrep '^#|^[^ ]*=[^;&]*' "${configfile}" > "${configfile_secured}"
+        configfile="${configfile_secured}"
+    fi
+
+    source "${configfile}"
+
+    json=$(curl -sS ${blink1api}${ifttt_key})
+    event_count=$(echo ${json} | ${jq} '.event_count')
+
+    if [ "0" -lt "${event_count}" ]; then
+        for event in $(echo ${json} | ${jq} -c '.events[] | { date: .date, name: .name }'); do
+            event_date=$(echo ${event} | ${jq} -r '.date')
+            event_name=$(echo ${event} | ${jq} -r '.name')
+
+            if [ "${localtime}" -lt "${event_date}" ]; then
+                if [[ ${ifttt_rules[${event_name}]} ]]; then
+                    ${blink1tool} -q ${ifttt_rules[${event_name}]}
+                fi
+            fi
+        done
+    fi
+
+    localtime=$(date -u +%s)
+    sleep 10m
+done
