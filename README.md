@@ -8,6 +8,10 @@ Download desired script and make it executable.
 ### Tea timer
 ```bash
 $ tea-timer [MINUTES]
+$ tea-timer --black # 5 minutes
+$ tea-timer --green # 3 minutes
+$ tea-timer --herbal # 8 minutes
+$ tea-timer --fruit # 8 minutes
 ```
 
 Pulsates green after the given time in minutes. Minutes can be anything that works with `sleep`.
