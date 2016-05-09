@@ -1,18 +1,51 @@
 #!/bin/bash
 BLINKTOOL=$(which blink1-tool)
 
+show_help() {
+    echo "Usage:"
+	echo "  tea-timer <OPTION>"
+	echo "where <OPTION> is one of:"
+	echo "  --black    For black teas, set to 5 minutes"
+	echo "  --fruit    For fruit teas, set to 8 minutes"
+	echo "  --green    For green teas, set to 3 minutes"
+	echo "  --herbal   For herbal teas, set to 8 minutes"
+	echo "  [MINUTES]  Anything that works with sleep, interpreted as time in minutes"
+	exit 0
+}
+
 if [ "" = "$BLINKTOOL" ]; then
 	echo "blink1-tool not found"
 	exit 1
 fi
 
 if [ 0 = $# ]; then
-	echo "Usage: tea-timer [MINUTES]"
-	exit 0
+	show_help
 fi
 
 $BLINKTOOL --off -q
-sleep "${1}m"
+
+case "$1" in
+    --black)
+        sleep 5m
+        ;;
+    --green)
+        sleep 3m
+        ;;
+    --herbal)
+        sleep 8m
+        ;;
+    --fruit)
+        sleep 8m
+        ;;
+    --help)
+        show_help
+        ;;
+    -h)
+        show_help
+        ;;
+    *)
+        sleep "${1}m"
+esac
 
 $BLINKTOOL --playpattern "3,#00ff00,2,0,#009900,2,0" -q
 $BLINKTOOL --off -q
